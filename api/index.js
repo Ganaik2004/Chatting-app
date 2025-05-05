@@ -1,6 +1,7 @@
 import express from 'express'
 import dotenv from 'dotenv'
 import mongoose from 'mongoose';
+import path from 'path'
 import userRoutes from './routes/userRoutes.js'
 import chatRoutes from './routes/chatRoutes.js'
 import messageRoutes from './routes/messageRoutes.js'
@@ -15,7 +16,7 @@ mongoose.connect(process.env.MONGO_URL).then(()=>{
     console.log(err)
 })
 
-
+const __dirname = path.resolve();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
@@ -26,10 +27,13 @@ app.get('/',(req,res)=>{
 app.use('/api/chat',chatRoutes)
 app.use('/api/user',userRoutes);
 app.use("/api/message",messageRoutes)
-
+app.use(express.static(path.join(__dirname, "./client/dist")));
 const server = app.listen(port,()=>{
     console.log(`Server is strted at ${port}`)
 })
+app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, 'client','dist', 'index.html'));
+  });
 const io = new Server(server, {
     pingTimeout: 60000,
     cors: {
